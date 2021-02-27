@@ -1,0 +1,17 @@
+#
+# IGNORE FILES AND FOLDRES
+
+# various
+acc
+des
+test
+.DS_Store
+.eslintrc
+*~
+*.graffle
+*.data
+.smbdelete*
+* copy.*
+*.sublime-workspace
+config.codekit3
+.jsbeautifyrc
