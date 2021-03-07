@@ -58,35 +58,32 @@ var generic = {
 			const menu = page.render_menu()
 			fragment.appendChild(menu)
 
-		const wrapper = common.create_dom_element({
-			element_type	: "div",
-			class_name		: "wrapper",		
-			parent			: fragment
-		})
+		// wrapper
+			const wrapper = document.createElement("div");
+				  wrapper.classList.add("wrapper")
+			fragment.appendChild(wrapper)
+		
+		// title
+			const title_node = document.createElement("h1");
+				  title_node.classList.add("title")
+				  title_node.insertAdjacentHTML('afterbegin', row.title)
+			wrapper.appendChild(title_node)	
 
-		const title = common.create_dom_element({
-			element_type	: "h1",
-			class_name		: "title",
-			inner_html		: row.title,
-			parent			: wrapper
-		})
-
-		if (row.abstract) {
-			const body = common.create_dom_element({
-				element_type	: "div",
-				class_name		: "abstract",
-				inner_html		: row.abstract,
-				parent			: wrapper
-			})
-		}
-
-		const body = common.create_dom_element({
-			element_type	: "div",
-			class_name		: "body",
-			inner_html		: row.body,
-			parent			: wrapper
-		})
-
+		// abstract
+			if (row.abstract) {
+				const abstract_node = document.createElement("div");
+					  abstract_node.classList.add("abstract")
+					  abstract_node.insertAdjacentHTML('afterbegin', row.abstract)
+				wrapper.appendChild(abstract_node)	
+			}
+		
+		// body
+			if (row.body) {
+				const body_node = document.createElement("div");
+					  body_node.classList.add("body")
+					  body_node.insertAdjacentHTML('afterbegin', row.body)
+				wrapper.appendChild(body_node)
+			}
 		
 		
 		return fragment

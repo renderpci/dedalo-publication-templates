@@ -1,7 +1,10 @@
-.lang_selector a.selected {
-  font-weight: 600;
+.hide {
+  display: none !important;
 }
-.template {
-  background-color: #f1d1a8;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.lang_selector .selected {
+  font-weight: 600;
 }
 /*# sourceMappingURL=page.css.map */

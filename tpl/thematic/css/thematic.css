@@ -5,4 +5,151 @@
   background-color: #52e28f;
   color: white;
 }
+.image_indexation_item {
+  height: 80px;
+}
+.player_node {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-color: #020202cc;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  padding-left: calc(50vw - 360px);
+  padding-top: calc(50vh - 202px);
+}
+.close_player {
+  position: fixed;
+  top: 20px;
+  right: 39px;
+  font-size: 40px;
+  color: #ffffff;
+  cursor: pointer;
+}
+#rows_list {
+  min-height: 14em;
+  position: relative;
+}
+#rows_list.list {
+  height: 50vh;
+  min-height: 640px;
+  border: 1px solid green;
+  background-color: #dae8dc;
+}
+#rows_list.map {
+  height: 50vh;
+  min-height: 640px;
+  border: 1px solid red;
+  background-color: #eeeeee;
+}
+#rows_list.timeline {
+  height: 50vh;
+  min-height: 640px;
+  border: 1px solid orange;
+}
+.tree_wrapper {
+  width: 100%;
+  padding: 2em;
+}
+.tree_wrapper .tree_node {
+  margin-left: 1.65em;
+}
+.tree_wrapper .tree_node > span {
+  vertical-align: text-bottom;
+  font-size: 1.15em;
+  line-height: 1em;
+  display: inline-block;
+  user-select: none;
+  height: 1em;
+  margin-right: 0.25em;
+}
+.tree_wrapper .tree_node > .term {
+  letter-spacing: 0.015em;
+  font-weight: 400;
+}
+.tree_wrapper .tree_node > .term.hilite {
+  background-color: #f0e134;
+  padding: 0.15em;
+  padding-left: 0.35em;
+  padding-right: 0.35em;
+  border-radius: 0.15em;
+  vertical-align: text-top;
+  line-height: 0.65em;
+}
+.tree_wrapper .tree_node > .term small {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: unset;
+  color: #c0c0c0;
+}
+.tree_wrapper .tree_node > .nd {
+  font-size: 0.8em;
+  color: #9d9d9d;
+}
+.tree_wrapper .tree_node > .btn_scope_note {
+  background-image: url('../../assets/images/icon_info.svg');
+  background-repeat: no-repeat;
+  background-size: 76%;
+  background-position: center center;
+  width: 1em;
+  cursor: pointer;
+}
+.tree_wrapper .tree_node > .btn_scope_note:active {
+  opacity: 0.5;
+}
+.tree_wrapper .tree_node > .btn_scope_note.open {
+  opacity: 0.5;
+}
+.tree_wrapper .tree_node > .btn_relations,
+.tree_wrapper .tree_node > .btn_indexation {
+  background-image: url('../../assets/images/icon_eye.svg');
+  background-repeat: no-repeat;
+  background-size: 80%;
+  background-position: center;
+  width: 1em;
+  cursor: pointer;
+}
+.tree_wrapper .tree_node > .btn_relations:active,
+.tree_wrapper .tree_node > .btn_indexation:active {
+  opacity: 0.5;
+}
+.tree_wrapper .tree_node > .btn_relations.open,
+.tree_wrapper .tree_node > .btn_indexation.open {
+  transform: rotate(180deg);
+}
+.tree_wrapper .tree_node > .arrow {
+  background-image: url('../../assets/images/icon_arrow_right.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  width: 1em;
+  cursor: pointer;
+}
+.tree_wrapper .tree_node > .arrow:active {
+  opacity: 0.5;
+}
+.tree_wrapper .tree_node > .arrow.open {
+  transform: rotate(90deg);
+}
+.tree_wrapper .tree_node > .scope_note {
+  background-color: #94c67c;
+  padding: 0.75em;
+  line-height: 1.4em;
+  color: #ffffff;
+  border-radius: 3px;
+  width: fit-content;
+}
+.tree_wrapper .tree_node > .scope_note * {
+  color: inherit;
+}
+.tree_wrapper .tree_node > .scope_note br + br {
+  display: none;
+}
+.tree_wrapper .tree_node > .branch {
+  display: block;
+}
+.tree_wrapper > .tree_node > .term {
+  font-weight: 600 !important;
+}
 /*# sourceMappingURL=thematic.css.map */

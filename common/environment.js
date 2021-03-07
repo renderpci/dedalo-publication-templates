@@ -7,14 +7,13 @@ var environment = {
 	version : null,
 
 	// config.json file vars
-	langs	: [],
-	lang	: null,
-	api_code : null,
-	api_db_name : null,
-	api_server_url : null,
-	table_menu : null,
-	table_menu_filter : null,
-	menu_global_page : null,
+	langs				: [],
+	lang				: null,
+	api_code			: null,
+	api_db_name			: null,
+	api_server_url		: null,
+	table_menu			: null,
+	table_menu_filter	: null,
 
 	// lg-mylang.json file vars
 	// tstring . Object with all website label strings in current lang (filled from file /lang/mylang.json)

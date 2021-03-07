@@ -3,29 +3,15 @@
 <head>
 	<title></title>	
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="./page/css/page.css">
+	<script type="text/javascript" src="./page/js/page.js"></script>
 </head>
-<body class="">
+<body>
 	<div id="page-wrapper">
-		<div id="lang_selector" class="lang_selector"></div>
-		<div id="menu" class="menu"></div>
 		<div id="template" class="template"></div>
 	</div>
 </body>
 </html>
 <script>
-	// version
-	const version = '0.0.7'
-
-	const boot_scripts = [
-		'./common/environment.js',
-		'./page/js/boot.js'
-	]
-	for (let i = 0; i < boot_scripts.length; i++) {			
-		const script = document.createElement('script')
-		script.src = boot_scripts[i] + '?' + version
-		document.body.appendChild(script)		
-	}
+	page.init()
 </script>
-<!-- <script src="./common/environment.js"></script> -->
-<!-- <script defer src="./page/js/boot.js"></script> -->

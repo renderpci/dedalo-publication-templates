@@ -1,17 +1,50 @@
-/**
-* page.js
-*/
 
+
+
+// config. Set the site config in JSON format
+	const config = {
+		api_server_url		: "https://dedalo.dev/dedalo/lib/dedalo/publication/server_api/v1/json/",
+		api_code			: "7Yd8jdyf_duen327!udjx",
+		api_db_name			: "web_dedalo_demo_dev",
+		media_base_url		: "https://dedalo.dev",
+		table_menu			: "ts_web",
+		table_menu_filter	: "menu='yes'",
+		langs				: [{
+			code	: "lg-spa",
+			label	: "Español"
+		},
+		{
+			code	: "lg-eng",
+			label	: "English"
+		}],
+		lang_default			: "lg-eng",
+		thesaurus_tables		: ["ts_anthropology"],
+		thesaurus_root_terms	: ["aa1_1"],
+		version					: '0.0.1'
+	}
+
+
+
+// setup initial config environment
+	const environment = config
+	// get and set user selected lang from localStorage if exists
+	environment.lang = localStorage.getItem('lang') || environment.lang_default
+
+
+
+/**
+* PAGE.JS
+*/
 var page = {
 
 
 	/**
 	* VARS
 	*/
-	page_title	: null,
-	menu_data	: null,
-	row			: null,
-	area_name	: null,
+		page_title	: null,
+		menu_data	: null,
+		row			: null,
+		area_name	: null,
 
 
 
@@ -27,41 +60,56 @@ var page = {
 
 			// area name from url like /web_app/thesaurus -> 'thesaurus'
 				self.area_name = window.location.pathname.split('/').slice(1).pop() || 'main_home';
-					console.log("self.area_name:",self.area_name);			
 
-			// load menu data
-				self.load_menu_data()
-				.then(function(menu_data){
-						console.log("menu_data:",self.area_name, menu_data);
+			const template_container = document.getElementById("template")
 
-					// fix data
-					self.menu_data = menu_data
-					if (self.menu_data) {
+			// load additional basic scripts
+				const scripts = [
+					'./common/app_utils-min.js'
+				]
+				const ar_load_files = []
+				for (let i = 0; i < scripts.length; i++) {
 
-						// reder lang_selector
-							// const lang_selector_container = document.getElementById("lang_selector")
-							// const lang_selector = self.render_lang_selector()
-							// lang_selector_container.appendChild(lang_selector)
+					ar_load_files.push( new Promise(function(resolve, reject) {
+						
+						const script = document.createElement('script')
 
-						// render page menu
-							// const menu_container = document.getElementById("menu")
-							// const menu = self.render_menu(menu_container)
-							// menu_container.appendChild(menu)
+						script.src = scripts[i] + '?' + environment.version
 
-						// render tpl
-							self.row = self.menu_data.find(function(el){
-								return el.web_path===self.area_name
-							})
-							console.log("self.row:",self.row);
-							if (!self.row) {
-								console.error("ERROR 404: page '"+area_name+"' not found! Available pages (web_path):", self.menu_data.map(el=>el.web_path) );
-							}else{								
-								const template_container = document.getElementById("template")
-								self.render_template(template_container)
-							}
+						script.addEventListener('load', function() {
+							resolve(true)
+						})
+						document.head.appendChild(script)
+					}));
+				}			
+				Promise.all(ar_load_files).then(function() {
+					
+					// load ts_web data
+					self.load_ts_web_data()
+					.then(function(menu_data){
+
+						// fix data
+						self.menu_data = menu_data
+
+						// tpl
+						if (self.menu_data) {
+
+							// render tpl
+								self.row = self.menu_data.find(function(el){
+									return el.web_path===self.area_name
+								})								
+								if (!self.row) {
+									console.error("ERROR 404: page '"+area_name+"' not found! Available pages (web_path):", self.menu_data.map(el=>el.web_path) );
+								}else{									
+									self.render_template(template_container)
+									.then(function(template_node){										
+										template_container.appendChild(template_node)
+									})
+								}
 						}
 
-					resolve(true)
+						resolve(true)
+					})
 				})
 		})
 	},//end init
@@ -75,57 +123,50 @@ var page = {
 	render_lang_selector : function() {
 		
 		const self = this
+		
+		const langs			= environment.langs
+		const selected_lang	= environment.lang
 
-		const fragment = new DocumentFragment()
-
-		const ul = common.create_dom_element({
-			element_type	: "ul",
-			class_name		: "lang_selector",
-			parent			: fragment
-		})
-
-		const selected_lang = environment.lang
-
-		for (let i = 0; i < environment.langs.length; i++) {
+		// ul
+			const ul_node = document.createElement("ul")
+			ul_node.classList.add("lang_selector")
+		
+		for (let i = 0; i < langs.length; i++) {
 			
-			const lang = environment.langs[i]
+			const lang = langs[i]
 
-			const li = common.create_dom_element({
-				element_type	: "li",
-				parent			: ul
-			})
+			const li_node = document.createElement("li")
+			ul_node.appendChild(li_node)
 
-			const a = common.create_dom_element({
-				element_type	: "a",
-				inner_html		: lang.label,
-				class_name		: (lang.code===selected_lang) ? 'selected' : '',
-				// href			: environment.base_path + '?lang=' + lang.code,
-				parent			: li
-			})
-			a.addEventListener("click", function(e){
+			const a_node = document.createElement("a")
+			a_node.insertAdjacentHTML('afterbegin', lang.label)
+
+			if (lang.code===selected_lang) {
+				a_node.classList.add("selected")
+			}
+			a_node.addEventListener("click", function(e){
 				e.preventDefault()
-
-				environment.set_local_user_config({
-					lang : lang.code
-				})
+				localStorage.setItem('lang', lang.code)
 				location.reload()
 			})
+
+			li_node.appendChild(a_node)
 		}
 
 
-		return fragment
+		return ul_node
 	},//end render_lang_selector
 
 
 
 	/**
-	* LOAD_MENU_DATA
+	* LOAD_TS_WEB_DATA
 	* Call API and get all table 'environment.table_menu' records
 	* to buil the site menu and base info
 	* @return promise
 	*	resolved : array rows || false
 	*/
-	load_menu_data : function() {
+	load_ts_web_data : function() {
 
 		const self = this
 		
@@ -147,22 +188,22 @@ var page = {
 			})
 			.then(function(response){
 
-				const menu_data = self.parse_menu_data(response.result)
+				const menu_data = self.parse_ts_web_data(response.result)
 
 				resolve(response.result)
 			})
 		})	
-	},//end load_menu_data
+	},//end load_ts_web_data
 
 
 
 	/**
-	* PARSE_MENU_DATA
+	* PARSE_TS_WEB_DATA
 	* Parse stringnified columns and full paths
 	* @param array rows
 	* @return array rows
 	*/
-	parse_menu_data : function(rows) {
+	parse_ts_web_data : function(rows) {
 		
 		if (rows) {
 
@@ -182,7 +223,7 @@ var page = {
 		}
 
 		return rows
-	},//end parse_menu_data
+	},//end parse_ts_web_data
 
 
 
@@ -194,28 +235,25 @@ var page = {
 		
 		const self = this
 
-		const fragment = new DocumentFragment()	
+		// ul
+			const ul_node = document.createElement("ul")
+			ul_node.classList.add("menu")
 
 		function build_li(row) {
-			
-			const li = common.create_dom_element({
-				element_type	: "li",
-				parent			: fragment
-			})
-			li.parent_term_id	= row.parent
-			li.term_id			= row.term_id
+
+			const li_node = document.createElement("li")
+			li_node.parent_term_id	= row.parent
+			li_node.term_id			= row.term_id
+			ul_node.appendChild(li_node)			
 
 			if (row.active==='yes') {
-				const a = common.create_dom_element({
-					element_type	: "a",
-					class_name		: "",
-					inner_html		: row.term,
-					href			: row.web_path,
-					parent			: li
-				})
+				const a_node = document.createElement("a")
+				a_node.insertAdjacentHTML('afterbegin', row.term)
+				a_node.href = row.web_path
+				li_node.appendChild(a_node)
 			}
 
-			return li
+			return li_node
 		}
 
 		const li_elements = []
@@ -223,15 +261,16 @@ var page = {
 			
 			const row = self.menu_data[i]
 
-			if (row.term_id!==environment.menu_global_page && row.menu==='yes') {
+			if (row.menu==='yes') {
 				const li = build_li(row)
 				li_elements.push(li)
 			}			
 		}
 		
-		for (let i = 0; i < fragment.childNodes.length; i++) {
+		// for (let i = 0; i < fragment.childNodes.length; i++) {
+		for (let i = 0; i < ul_node.childNodes.length; i++) {
 			
-			const li = fragment.childNodes[i]
+			const li = ul_node.childNodes[i]
 			if (li.parent_term_id && li.parent_term_id.length>0) {
 
 				// parent
@@ -242,11 +281,12 @@ var page = {
 					const parent_ul = (parent_element.lastChild && parent_element.lastChild.tagName==='UL')
 						? parent_element.lastChild
 						: (function(){
-							return common.create_dom_element({
-								element_type	: "ul",
-								class_name		: "icon solid fa-angle-down " + li.term_id,
-								parent			: parent_element
-							})
+							
+							const ul_inside_node = document.createElement("ul")
+							ul_inside_node.classList.add("menu","icon","fa-angle-down")
+							parent_element.appendChild(ul_inside_node)
+
+							return ul_inside_node
 						  })()
 					
 					parent_ul.appendChild(li)
@@ -254,29 +294,60 @@ var page = {
 			}
 		}
 
-		const ul = common.create_dom_element({
-			element_type	: "ul",
-			class_name		: "menu"
-		})
-		ul.appendChild(fragment)
+		// const ul = common.create_dom_element({
+		// 	element_type	: "ul",
+		// 	class_name		: "menu"
+		// })
+		// ul.appendChild(fragment)
 		
-		return ul
-	},//end render_menu
+		return ul_node
+	},//end render_menu	
 
 
 
 	/**
-	* LOAD_TEMPLATE_FILES
-	* @return 
+	* RENDER_TEMPLATE
+	* @return promise
 	*/
-	load_template_files : function() {
+	render_template : function(template_container) {
 		
 		const self = this
 
 		return new Promise(function(resolve){
 
 			const template_name = self.row.template_name
-				console.log("template_name:",template_name);
+
+			self.load_template_files(template_name)
+			.then(function(response){
+
+				const template = window[template_name]
+
+				template.init({
+					row : self.row
+				})
+				.then(function(response){
+					
+					const template_node = template.render()
+					if (template_node) {
+						template_container.appendChild(template_node)
+					}					
+					resolve(template_node)
+				})								
+			})
+		})
+	},//end render_template
+	
+
+
+	/**
+	* LOAD_TEMPLATE_FILES
+	* @return promise
+	*/
+	load_template_files : function(template_name) {
+		
+		const self = this
+
+		return new Promise(function(resolve){
 
 			// css
 				const styles = [
@@ -287,7 +358,7 @@ var page = {
 					const link	= document.createElement('link')
 					link.rel	= "stylesheet"
 					link.type	= "text/css"
-					link.href	= styles[i] + '?' + version
+					link.href	= styles[i] + '?' + environment.version
 					head.appendChild(link)
 				}
 
@@ -302,12 +373,12 @@ var page = {
 						
 						const script = document.createElement('script')
 
-						script.src = scripts[i] + '?' + version
+						script.src = scripts[i] + '?' + environment.version
 
 						script.addEventListener('load', function() {
 							resolve(true)
 						})
-						document.body.appendChild(script)
+						document.head.appendChild(script)
 					}));
 				}
 
@@ -320,36 +391,22 @@ var page = {
 
 
 	/**
-	* RENDER_TEMPLATE
-	* @return promise
+	* GET_POSTERFRAME_FROM_VIDEO
+	* Resolve posterframe url from video url replacing path and suffix
 	*/
-	render_template : function(template_container) {
-		
-		const self = this
+	get_posterframe_from_video : function(video_url) {
 
-		return new Promise(function(resolve){
+		let posterframe_url = video_url
+			posterframe_url = posterframe_url.replace(/\/404\//g, '/posterframe/')
+			posterframe_url = posterframe_url.replace(/\.mp4/g, '.jpg')
 
-			self.load_template_files()
-			.then(function(response){
+		const ar_parts = posterframe_url.split("?")
+			if (typeof ar_parts[0]!=="undefined") {
+				posterframe_url = ar_parts[0]
+			}
 
-				const template = window[self.row.template_name]
-
-				template.init({
-					row : self.row
-				})
-				.then(function(response){					
-				
-					const template_node = template.render()
-					if (template_node) {
-						template_container.appendChild(template_node)
-					}
-					
-					resolve(template_node)
-				})								
-			})
-		})
-	},//end render_template
-	
+		return posterframe_url
+	},//end get_posterframe_from_video
 
 
 
