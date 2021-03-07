@@ -1,4 +1,4 @@
-/*global tstring, page_globals, __WEB_TEMPLATE_WEB__, Promise, BackgroundColorTheif, SHOW_DEBUG, row_fields, common, page*/
+/*global tstring, page_globals, __WEB_TEMPLATE_WEB__, Promise, SHOW_DEBUG, row_fields, common, page*/
 /*eslint no-undef: "error"*/
 
 "use strict";
@@ -94,31 +94,7 @@ function tree_factory() {
 			}			
 
 		// rows
-			self.root_term = options.root_term		
-
-		// keyboard set
-			// document.addEventListener("keyup", function(e){
-				
-			// 	switch(e.keyCode) {
-			// 		case 40 : // arrow down
-			// 		// case 39 : // arrow right
-			// 			const navigation_next = document.getElementById("navigation_next")
-			// 			if (navigation_next) {
-			// 				navigation_next.click()
-			// 				console.log("navigating to next panel");
-			// 			}
-			// 			break;
-
-			// 		case 38 : // arrow up
-			// 		// case 37 : // arrow left
-			// 			const navigation_prev = document.getElementById("navigation_prev")
-			// 			if (navigation_prev) {
-			// 				navigation_prev.click()
-			// 				console.log("navigating to previous panel");
-			// 			}
-			// 			break;
-			// 	}
-			// })
+			self.root_term = options.root_term
 
 		// status
 			self.status = "initied"
@@ -146,7 +122,7 @@ function tree_factory() {
 			const fragment = new DocumentFragment();
 
 			// tree_wrapper. Create the tree wrapper and insert into parent node 'self.target')
-				const tree_wrapper = common.create_dom_element({
+				const tree_wrapper = self.create_dom_element({
 					element_type	: "div",
 					class_name		: "tree_wrapper",
 					parent			: fragment
@@ -213,7 +189,7 @@ function tree_factory() {
 
 			// scroll to hilite
 				if (self.set_hilite===true) {
-					common.when_in_dom(target, function(){
+					event_manager.when_in_dom(target, function(){
 						// find first hilited term
 						const tree_node = target.querySelector(".term.hilite")
 						// scroll document to hilited term (first founded at DOM)
@@ -241,7 +217,7 @@ function tree_factory() {
 		const self = this
 		
 		// node wrapper
-			const tree_node = common.create_dom_element({
+			const tree_node = self.create_dom_element({
 				element_type	: "div",
 				class_name		: "tree_node",
 				id				: row.term_id
@@ -255,24 +231,16 @@ function tree_factory() {
 			const term_value	= row.term //+ " <small>[" + row.term_id + "]</small>"
 			const to_hilite		= (row.hilite && row.hilite===true)
 			const term_css		= to_hilite===true ? " hilite" : ""
-			const term = common.create_dom_element({
+			const term = self.create_dom_element({
 				element_type	: "span",
 				class_name		: "term" + term_css,
 				inner_html		: term_value,
 				parent			: tree_node
-			})
-			// self.scrolled = false
-			// if (to_hilite && self.scrolled===false) {
-			// 	// console.log("to_hilite:",row.term, row.term_id);
-			// 	common.when_in_dom(tree_node, function(){
-			// 		tree_node.scrollIntoView()
-			// 	})
-			// 	self.scrolled = true
-			// }
+			})			
 
 		// nd
 			if (row.nd && row.nd.length>0) {
-				common.create_dom_element({
+				self.create_dom_element({
 					element_type	: "span",
 					class_name		: "nd",
 					inner_html		: "[" + row.nd.join(", ") + "]",
@@ -283,7 +251,7 @@ function tree_factory() {
 		// buttons
 			// button scope_note
 				if (row.scope_note && row.scope_note.length>0) {
-					const btn_scope_note = common.create_dom_element({
+					const btn_scope_note = self.create_dom_element({
 						element_type	: "span",
 						class_name		: "btn_scope_note",
 						parent			: tree_node
@@ -302,7 +270,7 @@ function tree_factory() {
 			// button relations
 				let btn_relations
 				if (row.relations && row.relations.length>0) {
-					btn_relations = common.create_dom_element({
+					btn_relations = self.create_dom_element({
 						element_type	: "span",
 						class_name		: "btn_relations",
 						// inner_html	: "Relations",
@@ -322,7 +290,7 @@ function tree_factory() {
 			// button indexation
 				let btn_indexation
 				if (row.indexation && row.indexation.length>0) {
-					btn_indexation = common.create_dom_element({
+					btn_indexation = self.create_dom_element({
 						element_type	: "span",
 						class_name		: "btn_indexation",
 						// inner_html	: "indexation",
@@ -337,41 +305,7 @@ function tree_factory() {
 							this.classList.add("open")
 						}
 					})
-				}
-			
-			// // button children
-			// 	if (row.childrens && row.childrens.length>0) {
-
-			// 		const open_style = row.state==="opened" ? " open" : ""
-
-			// 		const arrow = common.create_dom_element({
-			// 			element_type	: "span",
-			// 			class_name		: "arrow" + open_style,
-			// 			parent			: tree_node
-			// 		})
-			// 		arrow.addEventListener("mousedown", function(){
-			// 			let new_state
-			// 			if (this.classList.contains("open")) {
-			// 				branch.classList.add("hide")
-			// 				this.classList.remove("open")
-			// 				// new_state
-			// 				new_state = "closed"
-			// 			}else{
-			// 				branch.classList.remove("hide")
-			// 				this.classList.add("open")
-			// 				// new_state
-			// 				new_state = "opened"
-			// 			}
-						
-			// 			// state update
-			// 			const current_state = self.tree_state.find(item => item.id===row.term_id)
-			// 			if (current_state && current_state.state!==new_state) {
-			// 				current_state.state = new_state
-			// 				// update sessionStorage tree_state var
-			// 				sessionStorage.setItem('tree_state', JSON.stringify(self.tree_state));
-			// 			}
-			// 		})
-			// 	}
+				}			
 
 		// scope note wrapper
 			let scope_note		
@@ -381,7 +315,7 @@ function tree_factory() {
 								
 				// scope_note
 					const scope_note_text = row.scope_note.replace(/^\s*<br\s*\/?>|<br\s*\/?>\s*$/g,'');
-					scope_note = common.create_dom_element({
+					scope_note = self.create_dom_element({
 						element_type	: "div",
 						class_name		: "scope_note hide",
 						inner_html		: scope_note_text,
@@ -394,7 +328,7 @@ function tree_factory() {
 			if (row.relations && row.relations.length>0) {
 
 				// relations_container
-					relations_container = common.create_dom_element({
+					relations_container = self.create_dom_element({
 						element_type	: "div",
 						class_name		: "relations_container hide",
 						parent			: tree_node
@@ -444,7 +378,7 @@ function tree_factory() {
 			if (row.indexation && row.indexation.length>0) {
 
 				// indexation_container
-					indexation_container = common.create_dom_element({
+					indexation_container = self.create_dom_element({
 						element_type	: "div",
 						class_name		: "indexation_container hide",
 						parent			: tree_node
@@ -461,7 +395,12 @@ function tree_factory() {
 								if (!mutationsList[0].target.classList.contains("hide")) {
 									
 									// draw nodes
-									self.render_indexation_nodes(row, indexation_container, self)
+									// self.render_indexation_nodes(row, indexation_container, self)
+									event_manager.publish('show_indexation_nodes', {
+										row						: row,
+										indexation_container	: indexation_container,
+										instance				: self
+									})
 									
 									// Stop observing
 									observer.disconnect();
@@ -494,7 +433,7 @@ function tree_factory() {
 
 					const open_style = row.state==="opened" ? " open" : ""
 
-					const arrow = common.create_dom_element({
+					const arrow = self.create_dom_element({
 						element_type	: "span",
 						class_name		: "arrow" + open_style,
 						parent			: tree_node
@@ -526,11 +465,11 @@ function tree_factory() {
 		// children wrapper
 			let branch
 			if (row.childrens && row.childrens.length>0) {
-
+				
 				const hide_style = row.state==="opened" ? "" : " hide"
 								
 				// branch
-					branch = common.create_dom_element({
+					branch = self.create_dom_element({
 						element_type	: "div",
 						class_name		: "branch" + hide_style,
 						parent			: tree_node
@@ -619,7 +558,7 @@ function tree_factory() {
 				? title
 				: '' // (options.data.section_tipo + " " + options.data.section_id)
 
-			const relation_item = common.create_dom_element({
+			const relation_item = self.create_dom_element({
 				element_type	: "div",
 				class_name		: "relation_item",
 				title			: title_text + (SHOW_DEBUG ? (" [" + options.data.table + " " + options.data.section_tipo + " " + options.data.section_id + "]") : '')			})
@@ -655,71 +594,72 @@ function tree_factory() {
 	* RENDER_INDEXATION_NODES
 	* @return promise
 	*/
-	this.render_indexation_nodes = function(row, indexation_container, self) {
-		if(SHOW_DEBUG===true) {
-			console.log("-- render_indexation_nodes row:",row);
-		}	
-		
-		return new Promise(function(resolve){
-		
-			if (!row.indexation || row.indexation.length<1) {
-				resolve(false)
-			}
+		// this.render_indexation_nodes = function(row, indexation_container, self) {
+		// 	if(SHOW_DEBUG===true) {
+		// 		console.log("-- render_indexation_nodes row:",row);
+		// 	}	
+			
+		// 	return new Promise(function(resolve){
+			
+		// 		if (!row.indexation || row.indexation.length<1) {
+		// 			resolve(false)
+		// 			return
+		// 		}
 
-			if (typeof self.caller.get_indexation_data!=='function') {
-				console.warn("Ignored render_indexation_nodes call to undefined caller function 'get_indexation_data'");
-				resolve(false)
-			}
+		// 		if (typeof self.caller.get_indexation_data!=='function') {
+		// 			console.warn("Ignored render_indexation_nodes call to undefined caller function 'get_indexation_data'");
+		// 			resolve(false)
+		// 			return
+		// 		}
 
-			// get fragments
-				self.caller.get_indexation_data(row.indexation)
-				.then(function(response){
-					// console.log("-- row.indexation:",row.indexation);
-					// console.log("-- get_indexation_data response:",response);
+		// 		// get fragments
+		// 			self.caller.get_indexation_data(row.indexation)
+		// 			.then(function(response){
+		// 				// console.log("-- row.indexation:",row.indexation);
+		// 				// console.log("-- get_indexation_data response:",response);
 
-					const data_indexation	= response.data_indexation
-					const data_interview	= response.data_interview
+		// 				const data_indexation	= response.data_indexation
+		// 				const data_interview	= response.data_interview
 
-					// group by interview section_id
-						const groups = data_indexation.reduce(function (r, a) {
-							const interview_section_id = a.index_locator.section_top_id
-							r[interview_section_id] = r[interview_section_id] || [];
-							r[interview_section_id].push(a);
-							return r;
-						}, Object.create(null));
-						// console.log("-- groups:",groups);
+		// 				// group by interview section_id
+		// 					const groups = data_indexation.reduce(function (r, a) {
+		// 						const interview_section_id = a.index_locator.section_top_id
+		// 						r[interview_section_id] = r[interview_section_id] || [];
+		// 						r[interview_section_id].push(a);
+		// 						return r;
+		// 					}, Object.create(null));
 
-					// iterate groups
-						for(const section_top_id in groups){
-												
-							const data_video_items		= groups[section_top_id]
-							const relation_item_promise	= self.build_indexation_item({
-								data_video_items	: data_video_items,
-								data_interview		: data_interview,
-								term				: row.term,
-								parent				: indexation_container
-							})
-						}
+		// 				// iterate groups
+		// 					for(const section_top_id in groups){
+													
+		// 						const data_video_items		= groups[section_top_id]
+		// 						const relation_item_promise	= self.caller.build_indexation_item({
+		// 							data_video_items	: data_video_items,
+		// 							data_interview		: data_interview,
+		// 							term				: row.term,
+		// 							parent				: indexation_container
+		// 						})
+		// 					}
 
-					// // draw nodes
-					// const indexation_item_promises = []
-					// for (let i = 0; i < row.indexation.length; i++) {
+		// 				// // draw nodes
+		// 				// const indexation_item_promises = []
+		// 				// for (let i = 0; i < row.indexation.length; i++) {
 
-					// 	if (response.result[i]!==undefined) {
+		// 				// 	if (response.result[i]!==undefined) {
 
-					// 		const relation_item_promise = self.build_indexation_item({
-					// 			indexation	: row.indexation[i],
-					// 			data		: response.result[i],
-					// 			parent		: indexation_container								
-					// 		})
-					// 		indexation_item_promises.push(relation_item_promise)
-					// 	}
-					// }
+		// 				// 		const relation_item_promise = self.build_indexation_item({
+		// 				// 			indexation	: row.indexation[i],
+		// 				// 			data		: response.result[i],
+		// 				// 			parent		: indexation_container								
+		// 				// 		})
+		// 				// 		indexation_item_promises.push(relation_item_promise)
+		// 				// 	}
+		// 				// }
 
-					resolve(true)
-				})
-		})
-	};//end render_indexation_nodes	
+		// 				resolve(true)
+		// 			})
+		// 	})
+		// };//end render_indexation_nodes	
 
 
 
@@ -734,8 +674,6 @@ function tree_factory() {
 		const self = this
 
 		return new Promise(function(resolve){
-
-			// por acabar !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					
 			const parent			= options.parent
 			const data_video_items	= options.data_video_items
@@ -744,7 +682,7 @@ function tree_factory() {
 			
 			const av_section_id = data_video_items[0].section_id
 
-			const indexation_item = common.create_dom_element({
+			const indexation_item = self.create_dom_element({
 				element_type	: "div",
 				class_name		: "indexation_item",
 				// title		: (SHOW_DEBUG ? (" [" + options.data.table + " " + options.data.section_tipo + " " + options.data.section_id + "]") : ''),
@@ -768,7 +706,6 @@ function tree_factory() {
 
 					// image click event
 					img.addEventListener("click", function(){
-
 					
 						event_manager.publish('open_video', {
 							mode				: 'indexation', // indexation | tapes
@@ -853,15 +790,152 @@ function tree_factory() {
 
 
 
+	/**
+	* CREATE_DOM_ELEMENT
+	* Builds single dom element
+	*/
+	this.create_dom_element = function(element_options) {
+		
+		const element_type				= element_options.element_type
+		const parent					= element_options.parent
+		const class_name				= element_options.class_name
+		const style						= element_options.style
+		const data_set					= element_options.data_set || element_options.dataset
+		const custom_function_events	= element_options.custom_function_events
+		const title_label				= element_options.title_label || element_options.title
+		const text_node					= element_options.text_node
+		const text_content				= element_options.text_content
+		const inner_html				= element_options.inner_html
+		const href						= element_options.href
+		const id						= element_options.id
+		const draggable					= element_options.draggable
+		const value						= element_options.value
+		const download					= element_options.download
+		const src						= element_options.src
+		const placeholder				= element_options.placeholder
+		const type						= element_options.type // Like button, text ..
+		const target					= element_options.target
+		
+		const element = document.createElement(element_type);
+	
+		// Add id property to element
+		if(id){
+			element.id = id;
+		}
+
+		// A element. Add href property to element
+		if(element_type==='a'){
+			if(href){
+				element.href = href;
+			}else{
+				element.href = 'javascript:;'
+			}
+			if (target) {
+				element.target = target
+			}		
+		}
+		
+		// Class name. Add css classes property to element
+		if(class_name){
+			element.className = class_name
+		}
+
+		// Style. Add css style property to element
+		if(style){
+			for(key in style) {
+				element.style[key] = style[key]
+				//element.setAttribute("style", key +":"+ style[key]+";");
+			}		
+		}
+
+		// Title . Add title attribute to element
+		if(title_label){
+			element.title = title_label
+		}
+	
+		// Dataset Add dataset values to element		
+		if(data_set){
+			for (var key in data_set) {
+				element.dataset[key] = data_set[key]
+			}
+		}
+
+		// Value
+		if(value){
+			element.value = value
+		}
+
+		// Type
+		if(type){
+			//element.type = type
+			element.setAttribute("type", type)
+		}
+
+		// Click event attached to element
+		if(custom_function_events){
+			const len = custom_function_events.length
+			for (let i = 0; i < len; i++) {
+				const function_name			= custom_function_events[i].name
+				const event_type			= custom_function_events[i].type
+				const function_arguments	= custom_function_events[i].function_arguments					
+
+				// Create event caller
+				this.create_custom_events(element, event_type, function_name, function_arguments)
+			}
+		}//end if(custom_function_events){
+		
+		// Text content 
+		if(text_node){
+			//element.appendChild(document.createTextNode(TextNode));
+			// Parse html text as object
+			if (element_type==='span') {
+				element.textContent = text_node
+			}else{
+				const el = document.createElement('span')
+					  // el.innerHTML = " "+text_node // Note that prepend a space to span for avoid Chrome bug on selection
+					  el.insertAdjacentHTML('afterbegin', " "+text_node)
+				element.appendChild(el)
+			}			
+		}else if(text_content) {
+			element.textContent = text_content
+		}else if(inner_html) {
+			// element.innerHTML = inner_html
+			element.insertAdjacentHTML('afterbegin', inner_html)
+		}
+
+		// Append created element to parent
+		if (parent) {
+			parent.appendChild(element)
+		}
+
+		// Dragable
+		if(draggable){
+			element.draggable = draggable;
+		}
+
+		// Download
+		if (download) {
+			element.setAttribute("download", download)
+		}
+
+		// SRC Add id property to element
+		if(src){
+			element.src = src;
+		}
+
+		// placeholder
+		if (placeholder) {
+			element.placeholder = placeholder
+		}
+
+
+		return element;
+	}//end create_dom_element
+
+
+
+
 
 }//end tree_factory
-
-
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
-}
 
 

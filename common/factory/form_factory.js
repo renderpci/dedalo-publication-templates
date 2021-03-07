@@ -34,7 +34,7 @@ function form_factory() {
 
 		// store current instance
 			self.form_items[options.id] = form_item
-		
+
 
 		return form_item
 	}//end item_factory
@@ -315,7 +315,7 @@ function form_factory() {
 			const value_label = common.create_dom_element({
 				element_type	: "span",
 				class_name		: "value_label",
-				text_content	: label,
+				inner_html		: label,
 				parent			: line
 			})
 
@@ -382,10 +382,14 @@ function form_factory() {
 					const c_group = {}
 						  c_group[c_group_op] = []
 
+					// escape html strings containing single quotes inside.
+					// Like 'leyend <img data="{'lat':'452.6'}">' to 'leyend <img data="{''lat'':''452.6''}">'
+					const safe_value = form_item.q.replace(/(')/g, "''")
+
 					// q element
 						const element = {
 							field		: form_item.q_column,
-							value		: `'${form_item.eq_in}${form_item.q}${form_item.eq_out}'`, // Like '%${form_item.q}%'
+							value		: `'${form_item.eq_in}${safe_value}${form_item.eq_out}'`, // Like '%${form_item.q}%'
 							op			: form_item.eq, // default is 'LIKE'
 							sql_filter	: form_item.sql_filter,
 							wrapper		: form_item.wrapper
@@ -415,7 +419,6 @@ function form_factory() {
 					for (let j = 0; j < form_item.q_selected.length; j++) {
 
 						const value = form_item.q_selected[j]
-
 						// escape html strings containing single quotes inside.
 						// Like 'leyend <img data="{'lat':'452.6'}">' to 'leyend <img data="{''lat'':''452.6''}">'
 						const safe_value = value.replace(/(')/g, "''")
@@ -427,12 +430,12 @@ function form_factory() {
 						// elemet
 						const element = {
 							field		: form_item.q_column,
-							value		: (form_item.q_selected_eq==="LIKE") ? `'%${safe_value}%'` : `'${value}'`,
+							value		: (form_item.q_selected_eq==="LIKE") ? `'%${safe_value}%'` : `'${safe_value}'`,
 							op			: form_item.q_selected_eq,
 							sql_filter	: form_item.sql_filter,
 							wrapper		: form_item.wrapper
 						}
-						
+
 						c_group[c_group_op].push(element)
 
 						// q_table element
@@ -467,7 +470,7 @@ function form_factory() {
 				console.warn("-> form_to_sql_filter empty elements selected:", ar_query_elements)
 				return false;
 			}
-		
+
 		// operators value (optional)
 			const input_operators = self.node.querySelector('input[name="operators"]')
 			const operators_value = input_operators
@@ -803,7 +806,7 @@ function form_factory() {
 
 					// sql_filter
 						const sql_filter = self.parse_sql_filter(filter) // + ' AND `'+q_column+'`!=\'\''
-					
+
 					// search
 						data_manager.request({
 							body : {
@@ -934,7 +937,7 @@ function form_factory() {
 
 		// short vars
 			const form_items = self.form_items
-		
+
 
 		const ar_query_elements = []
 		for (let [id, form_item] of Object.entries(form_items)) {
