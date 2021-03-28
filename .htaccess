@@ -7,7 +7,7 @@
 # Activate rewrite
 	RewriteEngine on
 
-# RewriteBase / . Use the name of base directory like "/web_app2" for http://mujerymemoria/web_app2
+# RewriteBase / . Use the name of base directory like "/web_app2" for http://dedalo.dev/web_app2
 	# RewriteBase "/web_app2"
 	# Dynamic base. 
 	# @see https://stackoverflow.com/questions/21062290/set-rewritebase-to-the-current-folder-path-dynamically

@@ -7,4 +7,26 @@ body {
 .lang_selector .selected {
   font-weight: 600;
 }
+.template {
+  padding: 1em;
+}
+.player_node {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-color: #020202cc;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  padding-left: calc(50vw - 360px);
+  padding-top: calc(50vh - 202px);
+}
+.close_player {
+  position: fixed;
+  top: 20px;
+  right: 39px;
+  font-size: 40px;
+  color: #ffffff;
+  cursor: pointer;
+}
 /*# sourceMappingURL=page.css.map */

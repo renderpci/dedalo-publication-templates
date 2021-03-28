@@ -5,11 +5,10 @@
 	RewriteEngine On
 		
 	#
-	# Geta last dir name and send as var area_name to index page
+	# Get last dir name and send as var area_name to index page
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteCond %{REQUEST_FILENAME} !-f
-	# RewriteRule ^/?(\w+)+/?$ index.html?area_name=$1 [QSA,L]
-	RewriteRule ^/?([\S]+)+/?$ index.html?area_name=$1&nombre=pepe&id=1 [QSA,L]
+	RewriteRule ^/?(\w+)+/?$ index.html?area_name=$1 [QSA,L]
 	# RewriteRule ^(.*)$ index.html?route=/$1 [QSA,L]
 
 	#

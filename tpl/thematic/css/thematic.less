@@ -9,73 +9,10 @@
 
 
 
-.menu {
-	background-color: #52e28f;
-	color: white;
-}
-
-
-.image_indexation_item {
-	height: 80px;
-}
-
-.player_node {
-	width: 100%;
-	height: 100%;
-	position: fixed;
-	background-color: #020202cc;
-	z-index: 9;
-	top: 0;
-	left: 0;
-	padding-left: calc(50vw - 360px);
-	padding-top: calc(50vh - 202px);
-}
-
-.close_player {
-    position: fixed;
-    top: 20px;
-    right: 39px;
-    font-size: 40px;
-    color: #ffffff;
-    cursor: pointer;
-}
-
-
-
-// rows_list
-	#rows_list {
-		min-height: 14em;
-		position: relative;
-		
-
-		&.list {
-			height: 50vh;
-			min-height: 640px;
-			border: 1px solid green;
-			background-color: #dae8dc;
-		}
-		
-		&.map {
-			height: 50vh;
-			min-height: 640px;
-			border: 1px solid red;
-			background-color: #eeeeee;
-		}
-
-		&.timeline {
-			height: 50vh;
-			min-height: 640px;
-			border: 1px solid orange;
-		}
-	}
-
-
-
 // tree_wrapper
 	.tree_wrapper {
 		width: 100%;
 		padding: 2em;
-
 		
 		// every level
 		.tree_node {
@@ -189,25 +126,25 @@
 
 			>.relations_container {
 				// @see page.less
-			}
-			
+			}			
 
 			>.branch {
 				display: block;
 				// background-color: #a2f0ab;
 			}
-
 		}
 
-		// root level
+		// root level term only
 		>.tree_node {
 			>.term {
 				font-weight: 600 !important;
 			}
 		}
+
+		// image thumb of indexation videos
+		.image_indexation_item {
+			height: 80px;			
+		}
 	}
-
-
-
 
 

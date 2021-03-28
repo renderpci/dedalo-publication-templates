@@ -1,36 +1,43 @@
+/*jshint esversion: 6 */
+"use strict";
+
+
+
 /**
-* generic js
+* GENERIC JS
+* Default multipurpose template
 */
-
-
 var generic = {
 
 
-	row : null,
+	/**
+	* VARS
+	*/
+		// database record
+		row : null,
 
 
 
 	/**
 	* INIT
-	* @return 
+	* Set up current template.
+	* Load additional necessary files and set event listeners
+	* @param object options
+	*	{
+	*		row : database record data of current template from table ts_web
+	*	}
 	*/
 	init : function(options) {
-		console.log("generic init options:",options);
+		console.log("generic template init options:",options);
 
 		const self = this
 
 		// options
-			self.row = options.row		
+			self.row = options.row
 
 		return new Promise(function(resolve){
 			
-			// load aditional files if needed
-				// const template_name = 'generic'
-				// common.load_style( './tpl/' + template_name + '/css/' + template_name + '.css' + '?' + environment.version)
-				// common.load_script('./tpl/' + template_name + '/js/'  + template_name + '.js'  + '?' + environment.version)
-				// .then(function(response){
-				// 	resolve(true)
-				// })
+			// load here additional files if needed				
 
 			resolve(true)			
 		})
@@ -40,6 +47,11 @@ var generic = {
 
 	/**
 	* RENDER
+	* Called by page.render_template after init current template
+	* Creates all template html elements using
+	* fixed db row as data source (title, abstract, images, etc.)
+	* Note that menu and lang selectors are created here to gain
+	* html control about order etc.
 	* @return DOM DocumentFragment
 	*/
 	render : function() {
@@ -84,15 +96,21 @@ var generic = {
 					  body_node.insertAdjacentHTML('afterbegin', row.body)
 				wrapper.appendChild(body_node)
 			}
+
+		// images
+			if (row.image && row.image.length>0) {
+				for (let i = 0; i < row.image.length; i++) {					
+
+					const image_node = document.createElement("img");
+					image_node.src = environment.media_base_url + row.image[i].image
+					image_node.classList.add("image")
+					wrapper.appendChild(image_node)
+				}					
+			}		
 		
 		
 		return fragment
 	},//end render
-
-
-
-	
-
 
 
 

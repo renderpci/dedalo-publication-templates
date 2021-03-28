@@ -429,7 +429,7 @@ function tree_factory() {
 			}
 
 			// button children
-				if (row.childrens && row.childrens.length>0) {
+				if (row.children && row.children.length>0) {
 
 					const open_style = row.state==="opened" ? " open" : ""
 
@@ -464,7 +464,7 @@ function tree_factory() {
 
 		// children wrapper
 			let branch
-			if (row.childrens && row.childrens.length>0) {
+			if (row.children && row.children.length>0) {
 				
 				const hide_style = row.state==="opened" ? "" : " hide"
 								
@@ -758,7 +758,7 @@ function tree_factory() {
 			// request
 			data_manager.request({
 				body : {
-					dedalo_get			: 'thesaurus_childrens',
+					dedalo_get			: 'thesaurus_children',
 					db_name				: page_globals.WEB_DB,
 					lang				: page_globals.WEB_CURRENT_LANG_CODE,
 					ar_fields			: ['term_id'],

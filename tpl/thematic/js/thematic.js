@@ -1,76 +1,81 @@
+/*jshint esversion: 6 */
+"use strict";
 /**
-* thematic js
+* THEMATIC JS
 */
+
 
 
 var thematic = {
 
 
-	row		: null,
-	tree	: null,
+	/**
+	* VARS
+	*/
+		// database record
+		row : null,
 
-	form : null,
+		// form. DOM node form
+		form : null,
+		
+		// tree_factory instance
+		tree : null,
 
-	// tree data without parse
-	tree_raw_data : null,
+		// tree data raw without parse
+		tree_raw_data : null,
 
 
 
 	/**
 	* INIT
-	* @return 
+	* Set up current template.
+	* Load additional necessary files and set event listeners
+	* @param object options
+	*	{
+	*		row : database record data of current template from table ts_web
+	*	}
+	* @return promise
 	*/
 	init : function(options) {
 
 		const self = this
 
 		// options
-			self.row = options.row		
+			self.row		= options.row
+			self.term_id	= options.term_id || null; // request vars. optional request using GET
+
+		// config vars
+			// table. one or more thesaurus table names (array)
+			self.table = environment.thesaurus_tables
+			// root_term. start point/s from to iterate thesaurus list (array)
+			self.root_term = environment.thesaurus_root_terms
 
 		return new Promise(function(resolve){
-
-			// config vars
-				// table. one or more thesaurus table names (array)
-				self.table = environment.thesaurus_tables
-				// root_term. start point/s from to iterate thesaurus list (array)
-				self.root_term = environment.thesaurus_root_terms
-
-			// request vars. optional request using GET
-				self.term_id = options.term_id || null
 			
-			// load aditional files if needed
-				// const template_name = 'thematic'
-				// common.load_style( './tpl/' + template_name + '/css/' + template_name + '.css' + '?' + environment.version)
-
+			//load additional files if needed				
 				const scripts = [
-					'./common/factory/tree_factory.js'
+					'./common/factory/tree_factory.js' // small list lib
 				]
 				const ar_load_files = []
 				for (let i = 0; i < scripts.length; i++) {
 
 					ar_load_files.push( new Promise(function(resolve, reject) {
 						
-						const script = document.createElement('script')
-
-						script.src = scripts[i] + '?' + environment.version
-
+						const script	= document.createElement('script')
+						script.src		= scripts[i] + '?' + environment.version
 						script.addEventListener('load', function() {
 							resolve(true)
 						})
 						document.head.appendChild(script)
 					}));
-				}			
+				}
 				Promise.all(ar_load_files).then(function() {
 					resolve(true)
 				})
-				
 
 			// events subscriptions
 				event_manager.subscribe('show_indexation_nodes', self.render_indexation_nodes)
-				event_manager.subscribe('open_player', self.open_player)
-
-
-			// resolve(true)			
+				event_manager.subscribe('open_player', page.open_player)
 		})
 	},//end init
 
@@ -78,6 +83,7 @@ var thematic = {
 
 	/**
 	* RENDER
+	* Called by page.render_template after init current template
 	* @return DOM DocumentFragment
 	*/
 	render : function() {
@@ -131,15 +137,15 @@ var thematic = {
 		// tree. load tree data and render tree nodes
 			self.rows_list_node = document.createElement("div")
 			self.rows_list_node.classList.add("rows_list_node")
-			fragment.appendChild(self.rows_list_node)			
+			fragment.appendChild(self.rows_list_node)
 			
 			self.load_tree_data({})
-			.then(function(rows){				
+			.then(function(rows){
 				// tree factory
 				self.render_tree_data({
 					rows		: rows,
 					set_hilite	: (self.term_id && self.term_id.length>0)
-				})			
+				})
 				.then(function(){
 				
 				})
@@ -152,46 +158,45 @@ var thematic = {
 
 
 	/**
-	* RENDER_TREE_DATA
-	* @return promise
+	* RENDER_FORM
+	* Creates the form DOM nodes
+	* @return DOM node from
 	*/
-	render_tree_data : function(options) {
-		// console.log("-> render_tree_data options:",options);
+	render_form : function() {
 		
 		const self = this
 
-		// options
-			const rows 		 = options.rows
-			const set_hilite = options.set_hilite || false
-		
-		return new Promise(function(resolve){
-
-			const hilite_terms = self.term_id
-				? [self.term_id]
-				: null
-			const parsed_data = self.parse_tree_data(rows, hilite_terms) // prepares data to use in list
+		// form
+			const form_node = document.createElement("form");
+			form_node.type = "form"
 					
-			// tree factory			
-			self.tree = self.tree || new tree_factory() // creates / get existing instance of tree
-			self.tree.init({
-				target		: self.rows_list_node,
-				data		: parsed_data,
-				root_term	: self.root_term,
-				set_hilite	: set_hilite,
-				caller		: self
+		// term_input_search
+			const term_input_search = document.createElement("input");
+			term_input_search.id	= "term"
+			term_input_search.name	= "term"
+			form_node.appendChild(term_input_search)
+		
+		// submit button
+			const submit_button = document.createElement("input");
+			submit_button.type = "submit"
+			submit_button.value = "Search"
+			submit_button.classList.add("form-group","field")
+			submit_button.addEventListener("click",function(e){
+				e.preventDefault()
+				self.form_submit()
 			})
-			self.tree.render()
-			.then(function(){
-				resolve(true)
-			})
-		})
-	},//end render_tree_data
+			form_node.appendChild(submit_button)
+
+	
+		return form_node
+	},//end render_form
 
 
 
 	/**
 	* LOAD_TREE_DATA
-	* Call to API and load json data results of search
+	* Call to API and load the full thesaurus json data
+	* @return promise
 	*/
 	load_tree_data : function() {
 
@@ -256,7 +261,7 @@ var thematic = {
 		const data = []
 
 		// sample 
-			// childrens: "[{"type":"dd48","section_id":"2","section_tipo":"technique1","from_component_tipo":"hierarchy49"},{"type":"dd48","section_id":"3","section_tipo":"technique1","from_component_tipo":"hierarchy49"}]"
+			// children: "[{"type":"dd48","section_id":"2","section_tipo":"technique1","from_component_tipo":"hierarchy49"},{"type":"dd48","section_id":"3","section_tipo":"technique1","from_component_tipo":"hierarchy49"}]"
 			// code: "1191026"
 			// descriptor: "yes"
 			// illustration: null
@@ -278,7 +283,7 @@ var thematic = {
 			? [self.term_id]
 			: null
 	
-		const ar_parse = ['parent','childrens','space','indexation']
+		const ar_parse = ['parent','children','space','indexation']
 		function decode_field(field) {
 			if (field) {
 				return JSON.parse(field)
@@ -307,7 +312,7 @@ var thematic = {
 		// update_children_data recursive
 			function update_children_data(data, row){
 				
-				if ((!row.childrens || row.childrens.length===0) && (!row.indexation || row.indexation.length===0)) {
+				if ((!row.children || row.children.length===0) && (!row.indexation || row.indexation.length===0)) {
 
 					if (!row.parent) {
 						console.warn("parent not found for row:", row.term_id, row.term, row);
@@ -316,14 +321,14 @@ var thematic = {
 
 					const parent_term_id	= row.parent[0]
 					const parent_row		= data.find(item => item.term_id===parent_term_id)
-					if (parent_row) {
+					if (parent_row && parent_row.children) {
 						
-						const child_key = parent_row.childrens.findIndex(el => el.section_tipo===row.tld && el.section_id===row.section_id)
+						const child_key = parent_row.children.findIndex(el => el.section_tipo===row.tld && el.section_id===row.section_id)
 						// console.log("child_key:",child_key, row.term_id, row);
 						if (child_key!==-1) {
 							
 							// remove me as child
-							parent_row.childrens.splice(child_key, 1)
+							parent_row.children.splice(child_key, 1)
 
 							// recursion with parent
 							update_children_data(data, parent_row)
@@ -391,43 +396,8 @@ var thematic = {
 
 
 	/**
-	* RENDER_FORM
-	* @return DOM node from
-	*/
-	render_form : function() {
-		
-		const self = this
-
-		// form
-			const form_node = document.createElement("form");
-			form_node.type = "form"
-					
-		// term_input_search
-			const term_input_search = document.createElement("input");
-			term_input_search.id	= "term"
-			term_input_search.name	= "term"
-			form_node.appendChild(term_input_search)
-		
-		// submit button
-			const submit_button = document.createElement("input");
-			submit_button.type = "submit"
-			submit_button.value = "Search"
-			submit_button.classList.add("form-group","field")
-			submit_button.addEventListener("click",function(e){
-				e.preventDefault()
-				self.form_submit()
-			})
-			form_node.appendChild(submit_button)
-
-	
-		return form_node
-	},//end render_form
-
-
-
-	/**
 	* FORM_SUBMIT
-	* Form submit launch search
+	* Triggers the search
 	*/
 	form_submit : function() {
 		
@@ -487,6 +457,7 @@ var thematic = {
 
 	/**
 	* SEARCH_ROWS
+	* Search string in already downloaded thesaurus data
 	* @return promise
 	*	resolve array of objects
 	*/
@@ -494,11 +465,11 @@ var thematic = {
 		
 		const self = this
 
+		// options
+			const q			= options.q
+			const q_column	= options.q_column
+
 		return new Promise(function(resolve){
-			
-			// options
-				const q			= options.q
-				const q_column	= options.q_column	
 
 			const data = self.tree_raw_data
 
@@ -547,7 +518,45 @@ var thematic = {
 
 			resolve(response)
 		})
-	},//end search_rows
+	},//end search_rows		
+
+
+
+	/**
+	* RENDER_TREE_DATA
+	* @return promise
+	*/
+	render_tree_data : function(options) {
+		// console.log("-> render_tree_data options:",options);
+		
+		const self = this
+
+		// options
+			const rows 		 = options.rows
+			const set_hilite = options.set_hilite || false
+		
+		return new Promise(function(resolve){
+
+			const hilite_terms = self.term_id
+				? [self.term_id]
+				: null
+			const parsed_data = self.parse_tree_data(rows, hilite_terms) // prepares data to use in list
+					
+			// tree factory			
+			self.tree = self.tree || new tree_factory() // creates / get existing instance of tree
+			self.tree.init({
+				target		: self.rows_list_node,
+				data		: parsed_data,
+				root_term	: self.root_term,
+				set_hilite	: set_hilite,
+				caller		: self
+			})
+			self.tree.render()
+			.then(function(){
+				resolve(true)
+			})
+		})
+	},//end render_tree_data
 
 
 
@@ -642,6 +651,7 @@ var thematic = {
 				for (let i = 0; i < indexations_length; i++) {
 					
 					const index_locator = indexations[i]
+						console.log("index_locator:",index_locator);
 
 					ar_calls.push({
 						id		: 'indexation',
@@ -680,28 +690,29 @@ var thematic = {
 					}
 				})
 				.then(function(response){
+					console.log("response:",response);
+
+					const interview_response = response.result.find(el => el.id==='interview')
 
 					const result = {
-						data_interview	: response.result.find(el => el.id==='interview').result[0],
+						data_interview	: interview_response.result[0],
 						data_indexation	: []
 					}
 
 					for (let i = 0; i < response.result.length; i++) {
 						if (response.result[i].id==='indexation') {
 							
-							const item = response.result[i].result
+							const item = response.result[i].result						
 							if (!item.video_url) {
-								console.warn("Ignored invalid item without video_url:", item);
+								console.warn("Ignored indexation result without video_url:", item);
 								continue;
 							}
 
 							item.type			= 'fragment'
 							item.section_id		= item.index_locator.section_id
 							item.transcription	= item.fragm
-							delete item.fragm
+							delete item.fragm; // clean item duplicities
 							
-							// item.video_url = common.get_media_engine_url(item.video_url.split("/").pop(), 'av', null, true)
-						
 							result.data_indexation.push(item)
 						}					
 					}
@@ -744,6 +755,7 @@ var thematic = {
 				image_node.classList.add("image_indexation_item")
 				image_node.src = thumb_url
 				image_node.addEventListener("click", function(e){
+					// event publish
 					event_manager.publish('open_player', {
 						mode				: 'indexation', // indexation | tapes
 						data_interview		: data_interview,
@@ -755,47 +767,6 @@ var thematic = {
 				indexation_item.appendChild(image_node)			
 		})
 	},//end build_indexation_item
-
-
-
-	/**
-	* OPEN_PLAYER
-	* @return DOM node player_node
-	*/
-	open_player : function(options) {
-
-		// options
-			const data_video_items	= options.data_video_items
-			const data_interview	= options.data_interview
-			const term				= options.term
-			const selected_key		= options.selected_key
-
-		const player_node = document.createElement("div")
-		player_node.classList.add("player_node")
-		document.body.appendChild(player_node)
-		
-		const close_player = document.createElement("div")
-		close_player.classList.add("close_player")
-		close_player.innerHTML = 'X'
-		close_player.addEventListener("click", function(e){
-			video_node.remove()
-			player_node.remove()
-		})
-		player_node.appendChild(close_player)
-
-		const video_url = environment.media_base_url + data_video_items[selected_key].video_url
-		const thumb_url = page.get_posterframe_from_video(video_url) 
-		
-		const video_node	= document.createElement("video")
-		video_node.src		= video_url
-		video_node.poster	= thumb_url
-		video_node.controls	= true
-		player_node.appendChild(video_node)
-
-		
-		return player_node
-	},//end open_player
-
 
 
 
