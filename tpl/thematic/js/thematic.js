@@ -1,12 +1,14 @@
 /*jshint esversion: 6 */
 "use strict";
+
+
+
 /**
 * THEMATIC JS
+* Tree thesaurus manager
 */
-
-
-
 var thematic = {
+
 
 
 	/**
