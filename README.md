@@ -11,3 +11,5 @@ Is not intended to give production files, they are only functional samples keepi
 - tpl -> **free**: template to manage free search in video transcriptions and get video fragments
 - tpl -> **thematic**: template to manage browsable thesaurus tree and video indexations
 - tpl -> **faces**: template to manage a global informants view with complete interviews and transcriptions
+
+![Image of The Raspa](https://dedalo.dev/dedalo/media/image/web/IMG_7824.jpg)
