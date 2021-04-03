@@ -13,3 +13,7 @@ Is not intended to give production files, they are only functional samples keepi
 - tpl -> **faces**: template to manage a global informants view with complete interviews and transcriptions
 
 ![Image of The Raspa](https://dedalo.dev/dedalo/media/image/web/IMG_7824.jpg)
+
+
+[See working playground version!](https://dedalo.dev/playground/dedalo-publication-templates)
+
