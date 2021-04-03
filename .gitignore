@@ -15,3 +15,9 @@ test
 *.sublime-workspace
 config.codekit3
 .jsbeautifyrc
+*-min.js
+
+
+# assets ignore all except assets
+assets/*
+!assets/images
