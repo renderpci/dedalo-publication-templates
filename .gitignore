@@ -16,6 +16,7 @@ test
 config.codekit3
 .jsbeautifyrc
 *-min.js
+!app_utils-min.js
 
 
 # assets ignore all except assets
