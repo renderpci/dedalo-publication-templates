@@ -1,5 +1,5 @@
 #
-# IGNORE FILES AND FOLDRES
+# IGNORE FILES AND FOLDERS
 
 # various
 acc
@@ -13,7 +13,7 @@ test
 .smbdelete*
 * copy.*
 *.sublime-workspace
-config.codekit3
+*.codekit3
 .jsbeautifyrc
 *-min.js
 !app_utils-min.js
