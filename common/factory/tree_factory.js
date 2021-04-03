@@ -67,7 +67,6 @@ function tree_factory() {
 						self.data[i].state = current_session_item.state
 					}				 				
 				}
-				// console.log(">>>>>> self.tree_state from session cache:", self.tree_state);	
 
 			}else{
 				
@@ -85,12 +84,8 @@ function tree_factory() {
 						state	: current_state
 					})
 				}
-
-				// if (self.set_hilite!==true) {
-					sessionStorage.setItem('tree_state', JSON.stringify(self.tree_state));	
-				// }				
-
-				// console.log(">>>>>> self.tree_state calculated new:", self.tree_state);		
+				
+				sessionStorage.setItem('tree_state', JSON.stringify(self.tree_state))	
 			}			
 
 		// rows
@@ -109,7 +104,6 @@ function tree_factory() {
 	* RENDER
 	*/
 	this.render = function(options) {
-		// console.log("-- render options:",options);
 		
 		const self = this
 
@@ -394,8 +388,7 @@ function tree_factory() {
 									// console.log("mutationsList.target:",mutationsList[0].target);
 								if (!mutationsList[0].target.classList.contains("hide")) {
 									
-									// draw nodes
-									// self.render_indexation_nodes(row, indexation_container, self)
+									// show_indexation_nodes event
 									event_manager.publish('show_indexation_nodes', {
 										row						: row,
 										indexation_container	: indexation_container,
@@ -591,206 +584,6 @@ function tree_factory() {
 
 
 	/**
-	* RENDER_INDEXATION_NODES
-	* @return promise
-	*/
-		// this.render_indexation_nodes = function(row, indexation_container, self) {
-		// 	if(SHOW_DEBUG===true) {
-		// 		console.log("-- render_indexation_nodes row:",row);
-		// 	}	
-			
-		// 	return new Promise(function(resolve){
-			
-		// 		if (!row.indexation || row.indexation.length<1) {
-		// 			resolve(false)
-		// 			return
-		// 		}
-
-		// 		if (typeof self.caller.get_indexation_data!=='function') {
-		// 			console.warn("Ignored render_indexation_nodes call to undefined caller function 'get_indexation_data'");
-		// 			resolve(false)
-		// 			return
-		// 		}
-
-		// 		// get fragments
-		// 			self.caller.get_indexation_data(row.indexation)
-		// 			.then(function(response){
-		// 				// console.log("-- row.indexation:",row.indexation);
-		// 				// console.log("-- get_indexation_data response:",response);
-
-		// 				const data_indexation	= response.data_indexation
-		// 				const data_interview	= response.data_interview
-
-		// 				// group by interview section_id
-		// 					const groups = data_indexation.reduce(function (r, a) {
-		// 						const interview_section_id = a.index_locator.section_top_id
-		// 						r[interview_section_id] = r[interview_section_id] || [];
-		// 						r[interview_section_id].push(a);
-		// 						return r;
-		// 					}, Object.create(null));
-
-		// 				// iterate groups
-		// 					for(const section_top_id in groups){
-													
-		// 						const data_video_items		= groups[section_top_id]
-		// 						const relation_item_promise	= self.caller.build_indexation_item({
-		// 							data_video_items	: data_video_items,
-		// 							data_interview		: data_interview,
-		// 							term				: row.term,
-		// 							parent				: indexation_container
-		// 						})
-		// 					}
-
-		// 				// // draw nodes
-		// 				// const indexation_item_promises = []
-		// 				// for (let i = 0; i < row.indexation.length; i++) {
-
-		// 				// 	if (response.result[i]!==undefined) {
-
-		// 				// 		const relation_item_promise = self.build_indexation_item({
-		// 				// 			indexation	: row.indexation[i],
-		// 				// 			data		: response.result[i],
-		// 				// 			parent		: indexation_container								
-		// 				// 		})
-		// 				// 		indexation_item_promises.push(relation_item_promise)
-		// 				// 	}
-		// 				// }
-
-		// 				resolve(true)
-		// 			})
-		// 	})
-		// };//end render_indexation_nodes	
-
-
-
-	/**
-	* BUILD_INDEXATION_ITEM
-	* Build and append indexation_item to options parent element
-	* @return promise
-	*/
-	this.build_indexation_item = function(options) {
-		console.warn("-- build_indexation_item options:", options);
-		
-		const self = this
-
-		return new Promise(function(resolve){
-					
-			const parent			= options.parent
-			const data_video_items	= options.data_video_items
-			const data_interview	= options.data_interview
-			const term				= options.term
-			
-			const av_section_id = data_video_items[0].section_id
-
-			const indexation_item = self.create_dom_element({
-				element_type	: "div",
-				class_name		: "indexation_item",
-				// title		: (SHOW_DEBUG ? (" [" + options.data.table + " " + options.data.section_tipo + " " + options.data.section_id + "]") : ''),
-				parent			: parent
-			})
-
-			// img
-				const thumb_url = av_section_id
-					? common.get_media_engine_url(av_section_id, 'posterframe', 'thumb', true)
-					: __WEB_TEMPLATE_WEB__ + '/assets/images/default_thumb.jpg'
-
-				page.build_image_with_background_color(thumb_url, indexation_item, null)
-				.then(function(response){
-
-					const img = response.img
-
-					// append thumb image
-					indexation_item.appendChild(img)
-
-					let current_video_player_wrapper = null
-
-					// image click event
-					img.addEventListener("click", function(){
-					
-						event_manager.publish('open_video', {
-							mode				: 'indexation', // indexation | tapes
-							data_interview		: data_interview,
-							data_video_items	: data_video_items,
-							term				: term,
-							selected_key		: 0
-						})
-						/*
-						if (current_video_player_wrapper) {
-							current_video_player_wrapper.classList.toggle('hide')
-							return true
-						}
-
-						self.caller.video_player = self.caller.video_player || new video_player() // creates / get existing instance of player
-						self.caller.video_player.init({
-							mode				: 'indexation', // indexation | tapes
-							data_interview		: data_interview,
-							data_video_items	: data_video_items,
-							term				: term,
-							selected_key		: 0
-						})
-						self.caller.video_player.render()
-						.then(function(video_player_wrapper){
-							parent.appendChild(video_player_wrapper)
-							// set current_video_player_wrapper
-							current_video_player_wrapper = video_player_wrapper
-							// resolve(true)
-						})
-						*/
-					})
-					
-					resolve(img)
-				})			
-		})
-	};//end build_indexation_item
-
-
-
-	/**
-	* GET_THESAURUS_CHILDREN
-	* @return promise
-	*/
-	this.get_thesaurus_children = function(item_terms) {
-		
-		return new Promise(function(resolve){
-
-			const term_id = item_terms.join(',')
-			
-			// request
-			data_manager.request({
-				body : {
-					dedalo_get			: 'thesaurus_children',
-					db_name				: page_globals.WEB_DB,
-					lang				: page_globals.WEB_CURRENT_LANG_CODE,
-					ar_fields			: ['term_id'],
-					term_id				: term_id,
-					recursive			: true,
-					only_descriptors	: true,
-					remove_restricted	: false,
-					multiple			: true
-				}
-			})
-			.then(function(response){
-				// console.log("--- response:", term_id, response);
-				const ar_terms = []
-				const elements = response.result
-				for (let j = 0; j < elements.length; j++) {
-
-					const terms = elements[j].result
-					for (let i = 0; i < terms.length; i++) {
-						ar_terms.push(terms[i])
-					}
-				}
-
-				resolve(ar_terms.map(function(el){
-					return el.term_id
-				}))
-			})
-		})
-	};//end get_thesaurus_children
-
-
-
-	/**
 	* CREATE_DOM_ELEMENT
 	* Builds single dom element
 	*/
@@ -934,8 +727,4 @@ function tree_factory() {
 
 
 
-
-
 }//end tree_factory
-
-

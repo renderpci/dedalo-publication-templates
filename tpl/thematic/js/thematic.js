@@ -12,16 +12,16 @@ var thematic = {
 	/**
 	* VARS
 	*/
-		// database record
+		// database current record
 		row : null,
 
 		// form. DOM node form
 		form : null,
 		
-		// tree_factory instance
+		// tree_factory lib instance
 		tree : null,
 
-		// tree data raw without parse
+		// tree raw data without parse
 		tree_raw_data : null,
 
 
@@ -42,7 +42,8 @@ var thematic = {
 
 		// options
 			self.row		= options.row
-			self.term_id	= options.term_id || null; // request vars. optional request using GET
+			self.term_id	= options.term_id || null; // optional request using GET or similar
+
 
 		// config vars
 			// table. one or more thesaurus table names (array)
@@ -52,7 +53,7 @@ var thematic = {
 
 		return new Promise(function(resolve){
 			
-			//load additional files if needed				
+			// load additional files if are needed
 				const scripts = [
 					'./common/factory/tree_factory.js' // small list lib
 				]
@@ -74,7 +75,9 @@ var thematic = {
 				})
 
 			// events subscriptions
+				// show_indexation_nodes. Triggered by lib tree_factory
 				event_manager.subscribe('show_indexation_nodes', self.render_indexation_nodes)
+				// open_player. Triggered by each indexation item from self.build_indexation_item image nodes
 				event_manager.subscribe('open_player', page.open_player)
 		})
 	},//end init
@@ -147,7 +150,7 @@ var thematic = {
 					set_hilite	: (self.term_id && self.term_id.length>0)
 				})
 				.then(function(){
-				
+					// tree is rendered !
 				})
 			})
 		
@@ -204,9 +207,9 @@ var thematic = {
 
 		return new Promise(function(resolve){
 					
-			// data is calculated once
+			// data is loaded once
 				if (self.tree_raw_data && self.tree_raw_data.length>0) {
-					// console.log("-> load_tree_data. Returned already calculated tree self.tree_raw_data:", self.tree_raw_data);
+					// return already calculated tree self.tree_raw_data
 					const data = JSON.parse( JSON.stringify(self.tree_raw_data) );
 					resolve(data)
 					return
@@ -251,6 +254,8 @@ var thematic = {
 	/**
 	* PARSE_TREE_DATA
 	* Parse rows data to use in tree_factory
+	* Data from DB need to be parse because some column values ar JSON stringinfied arrays
+	* We clean here unused terms to create a useful tree	* 
 	*/
 	parse_tree_data : function(ar_rows_raw) {
 
@@ -260,7 +265,7 @@ var thematic = {
 
 		const data = []
 
-		// sample 
+		// sample row 
 			// children: "[{"type":"dd48","section_id":"2","section_tipo":"technique1","from_component_tipo":"hierarchy49"},{"type":"dd48","section_id":"3","section_tipo":"technique1","from_component_tipo":"hierarchy49"}]"
 			// code: "1191026"
 			// descriptor: "yes"
@@ -343,7 +348,6 @@ var thematic = {
 
 		// remove unused terms
 			const data_length = ar_rows_length
-			// for (let i = 0; i < data_length; i++) {
 			for (let i = data_length - 1; i >= 0; i--) {				
 
 				const row = data[i]
@@ -421,7 +425,7 @@ var thematic = {
 					const rows_list_node = self.rows_list_node
 					while (rows_list_node.hasChildNodes()) {
 						rows_list_node.removeChild(rows_list_node.lastChild);
-					}					
+					}
 
 				// load_tree_data
 					self.load_tree_data({})
@@ -457,7 +461,7 @@ var thematic = {
 
 	/**
 	* SEARCH_ROWS
-	* Search string in already downloaded thesaurus data
+	* Search a string against downloaded thesaurus data
 	* @return promise
 	*	resolve array of objects
 	*/
@@ -482,9 +486,10 @@ var thematic = {
 						if (q && q.length>0) {
 
 							// remove accents from text
-							const text_normalized = row[q_column].normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+							const text_normalized	= row[q_column].normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+							const q_normalized		= q.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 							
-							const regex	= RegExp(q, 'i')
+							const regex	= RegExp(q_normalized, 'i')
 							find = regex.test(text_normalized)
 						}					
 
@@ -511,7 +516,7 @@ var thematic = {
 					return element
 				})
 
-			// response. Format like a regular database result from API
+			// response. Format it like a regular database result from API
 				const response = {
 					result	: result
 				}
@@ -524,10 +529,10 @@ var thematic = {
 
 	/**
 	* RENDER_TREE_DATA
+	* Call to tree_factory lib to render whole tree
 	* @return promise
 	*/
 	render_tree_data : function(options) {
-		// console.log("-> render_tree_data options:",options);
 		
 		const self = this
 
@@ -540,10 +545,10 @@ var thematic = {
 			const hilite_terms = self.term_id
 				? [self.term_id]
 				: null
-			const parsed_data = self.parse_tree_data(rows, hilite_terms) // prepares data to use in list
+			const parsed_data = self.parse_tree_data(rows, hilite_terms) // prepares data to use it in tree_factory
 					
 			// tree factory			
-			self.tree = self.tree || new tree_factory() // creates / get existing instance of tree
+			self.tree = self.tree || new tree_factory() // get / creates a instance of tree
 			self.tree.init({
 				target		: self.rows_list_node,
 				data		: parsed_data,
@@ -557,77 +562,6 @@ var thematic = {
 			})
 		})
 	},//end render_tree_data
-
-
-
-	/**
-	* RENDER_INDEXATION_NODES
-	* Called from tree_factory
-	* @return promise
-	*/
-	render_indexation_nodes : function(options) {
-		console.log("-- render_indexation_nodes options:",options);		
-
-		// options
-			const row					= options.row
-			const indexation_container	= options.indexation_container
-			const self					= options.instance.caller
-		
-		return new Promise(function(resolve){
-		
-			if (!row.indexation || row.indexation.length<1) {
-				resolve(false)
-				return
-			}
-
-			// get fragments
-				self.get_indexation_data(row.indexation)
-				.then(function(response){
-					// console.log("-- row.indexation:",row.indexation);
-					// console.log("-- get_indexation_data response:",response);
-
-					const data_indexation	= response.data_indexation
-					const data_interview	= response.data_interview
-
-					// group by interview section_id
-						const groups = data_indexation.reduce(function (r, a) {
-							const interview_section_id = a.index_locator.section_top_id
-							r[interview_section_id] = r[interview_section_id] || [];
-							r[interview_section_id].push(a);
-							return r;
-						}, Object.create(null));
-
-					// iterate groups
-						for(const section_top_id in groups){
-												
-							const data_video_items		= groups[section_top_id]
-							const relation_item_promise	= self.build_indexation_item({
-								data_video_items	: data_video_items,
-								data_interview		: data_interview,
-								term				: row.term,
-								parent				: indexation_container
-							})
-						}
-
-					// // draw nodes
-						// const indexation_item_promises = []
-						// for (let i = 0; i < row.indexation.length; i++) {
-
-						// 	if (response.result[i]!==undefined) {
-
-						// 		const relation_item_promise = self.build_indexation_item({
-						// 			indexation	: row.indexation[i],
-						// 			data		: response.result[i],
-						// 			parent		: indexation_container								
-						// 		})
-						// 		indexation_item_promises.push(relation_item_promise)
-						// 	}
-						// }
-
-					resolve(true)
-				})
-		})
-	},//end render_indexation_nodes	
 
 
 
@@ -726,46 +660,99 @@ var thematic = {
 
 
 	/**
-	* BUILD_INDEXATION_ITEM
-	* Build and append indexation_item to options parent element
+	* RENDER_INDEXATION_NODES
+	* Triggered by event from tree_factory
 	* @return promise
+	*/
+	render_indexation_nodes : function(options) {
+
+		// options
+			const row					= options.row
+			const indexation_container	= options.indexation_container
+			const self					= options.instance.caller
+		
+		return new Promise(function(resolve){
+		
+			if (!row.indexation || row.indexation.length<1) {
+				resolve(false)
+				return
+			}
+
+			// get fragments
+				self.get_indexation_data(row.indexation)
+				.then(function(response){
+
+					const data_indexation	= response.data_indexation
+					const data_interview	= response.data_interview
+
+					// group by interview section_id
+						const groups = data_indexation.reduce(function (r, a) {
+							const interview_section_id = a.index_locator.section_top_id
+							r[interview_section_id] = r[interview_section_id] || [];
+							r[interview_section_id].push(a);
+							return r;
+						}, Object.create(null));
+
+					// iterate groups
+						for(const section_top_id in groups){
+												
+							const data_video_items		= groups[section_top_id]
+							const indexation_item_node	= self.build_indexation_item({
+								data_video_items	: data_video_items,
+								data_interview		: data_interview,
+								term				: row.term
+							})
+							indexation_container.appendChild(indexation_item_node)
+						}
+
+					resolve(true)
+				})
+		})
+	},//end render_indexation_nodes
+
+
+
+	/**
+	* BUILD_INDEXATION_ITEM
+	* Build a indexation_item DOM node
+	* @return DOM node indexation_item
 	*/
 	build_indexation_item : function(options) {
 		
 		const self = this
 
-		return new Promise(function(resolve){
-					
-			const parent			= options.parent
+		// options
 			const data_video_items	= options.data_video_items
 			const data_interview	= options.data_interview
-			const term				= options.term
+			const term				= options.term		
 			
-			const av_section_id = data_video_items[0].section_id
+		const av_section_id = data_video_items[0].section_id
 
+		// indexation_item
 			const indexation_item = document.createElement("div")
 			indexation_item.classList.add("indexation_item")
-			parent.appendChild(indexation_item)
-
-			// img
-				const video_url = environment.media_base_url + data_video_items[0].video_url
-				const thumb_url = page.get_posterframe_from_video(video_url)
-								
-				const image_node = document.createElement("img")
-				image_node.classList.add("image_indexation_item")
-				image_node.src = thumb_url
-				image_node.addEventListener("click", function(e){
-					// event publish
-					event_manager.publish('open_player', {
-						mode				: 'indexation', // indexation | tapes
-						data_interview		: data_interview,
-						data_video_items	: data_video_items,
-						term				: term,
-						selected_key		: 0
-					})
+		
+		// img
+			const video_url = environment.media_base_url + data_video_items[0].video_url
+			const thumb_url = page.get_posterframe_from_video(video_url)
+							
+			const image_node = document.createElement("img")
+			image_node.classList.add("image_indexation_item")
+			image_node.src = thumb_url
+			image_node.addEventListener("click", function(e){
+				// event publish
+				event_manager.publish('open_player', {
+					mode				: 'indexation', // indexation | tapes
+					data_interview		: data_interview,
+					data_video_items	: data_video_items,
+					term				: term,
+					selected_key		: 0
 				})
-				indexation_item.appendChild(image_node)			
-		})
+			})
+			indexation_item.appendChild(image_node)
+
+		
+		return indexation_item
 	},//end build_indexation_item
 
 

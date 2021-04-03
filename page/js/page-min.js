@@ -184,7 +184,7 @@ var page = {
 					// format/parse some columns data before continue
 						const menu_data = self.parse_ts_web_data(response.result)
 
-					resolve(response.result)
+					resolve(menu_data)
 				})
 		})	
 	},//end load_ts_web_data
@@ -220,7 +220,8 @@ var page = {
 				row.body = row.body
 					? row.body.replaceAll('../../../media', environment.media_base_url+'/dedalo/media')
 					: null
-
+					
+						
 				parsed_rows.push(row)
 			}
 		}
